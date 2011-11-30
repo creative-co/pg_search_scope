@@ -17,6 +17,22 @@ module PgSearchScope
       eosql
     end
   end
+  
+  module CommandRecorder
+    def add_fulltext_index *args
+      record(:add_fulltext_index, args)
+    end
+    
+    def invert_add_fulltext_index(args)
+      table, columns, options = *args
+      index_name = options.try(:[], :name)
+      options_hash =  index_name ? {:name => index_name} : {:column => columns}
+      [:remove_fulltext_index, [table, options_hash]]
+    end
+  end
 end
 
-ActiveRecord::Migration.send :extend, PgSearchScope::MigrationHelper
+require 'active_record/connection_adapters/postgresql_adapter'
+
+ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.send :include,  PgSearchScope::MigrationHelper
+ActiveRecord::Migration::CommandRecorder.send :include, PgSearchScope::CommandRecorder

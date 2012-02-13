@@ -56,7 +56,7 @@ module PgSearchScope
 
         if terms.present?
           prefix = arel_table.table_alias || arel_table.name
-          document = column_names.map { |n| "coalesce(#{prefix}.#{n}, '')" }.join(" || ' ' || ")
+          document = column_names.map { |n| n = "#{prefix}.#{n}" unless n['.']; "coalesce(#{n}, '')" }.join(" || ' ' || ")
 
           case options[:wildcard]
             when true then

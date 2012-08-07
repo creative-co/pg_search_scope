@@ -1,48 +1,51 @@
 module PgSearchScope
   module ModelHelper
     DEFAULT_OPTIONS = {
-        :as => nil,
-        :wildcard => true,
-        :operator => :and,
-        :normalization => 0,
-        :select_rank => false,
-        :language => 'simple'
+            :as => nil,
+            :wildcard => true,
+            :operator => :and,
+            :normalization => 0,
+            :select_rank => false,
+            :language => 'simple',
+            :rank_function => :ts_rank
     }
     OPERATORS = {
-        :and => '&',
-        :or => '|'
+            :and => '&',
+            :or => '|'
     }
 
-      # Creates fulltext search scope
-      #
-      # == Options
-      #
-      # * <tt>:as</tt> - Scope name
-      #
-      # * <tt>:normalization</tt> - Controls rank behaviour, see http://www.postgresql.org/docs/9.0/static/textsearch-controls.html#TEXTSEARCH-RANKING
-      #
-      # * <tt>:wildcard</tt> - Controls search words modification:
-      #                        true - add :* to ends of each search word
-      #                        false - do not modify search words
-      #                        :last - add :* to end of last word
-      #
-      # * <tt>:operator</tt> - Boolean operator (:and or :or) which combines search query
-      #
-      # * <tt>:select_rank</tt> - Include rank in select statement, as {scope_name}_rank
-      #
-      # * <tt>:language</tt> - Search language, e.g. 'simple' (without magic), 'english'
-      #
-      # == Usage
-      #
-      #   search_scope_for :name
-      #   -->
-      #   search_by_name("Ivan")
-      #
-      #   search_scope_for :name, :address,
-      #                    :wildcard => :last
-      #   -->
-      #   search_by_name_and_address("Ivan, Aurora st.", :select_rank => true)
-      #
+    # Creates fulltext search scope
+    #
+    # == Options
+    #
+    # * <tt>:as</tt> - Scope name
+    #
+    # * <tt>:normalization</tt> - Controls rank behaviour, see http://www.postgresql.org/docs/9.0/static/textsearch-controls.html#TEXTSEARCH-RANKING
+    #
+    # * <tt>:wildcard</tt> - Controls search words modification:
+    #                        true - add :* to ends of each search word
+    #                        false - do not modify search words
+    #                        :last - add :* to end of last word
+    #
+    # * <tt>:operator</tt> - Boolean operator (:and or :or) which combines search query
+    #
+    # * <tt>:select_rank</tt> - Include rank in select statement, as {scope_name}_rank
+    #
+    # * <tt>:language</tt> - Search language, e.g. 'simple' (without magic), 'english'
+    # * <tt>:rank_function</tt> - Ranking function. Valid values  are  'ts_rank' and 'ts_rank_cd'
+    #
+    # == Usage
+    #
+    #   search_scope_for :name
+    #   -->
+    #   search_by_name("Ivan")
+    #
+    #   search_scope_for :name, :address,
+    #                    :wildcard => :last
+    #   -->
+    #   search_by_name_and_address("Ivan, Aurora st.", :select_rank => true)
+    #
+
     def search_scope_for *column_names
       scope_options = DEFAULT_OPTIONS.merge column_names.extract_options!
 
@@ -52,7 +55,7 @@ module PgSearchScope
         options = scope_options.merge(options || {})
         search_string ||= ''
 
-        terms = search_string.scan(/'*([\p{Lu}\p{Ll}\d\.'@]+)/u).map {|s,_| s.gsub /'/, "''"}
+        terms = search_string.scan(/'*([\p{Lu}\p{Ll}\d\.'@]+)/u).map { |s, _| s.gsub /'/, "''" }
 
         if terms.present?
           prefix = arel_table.table_alias || arel_table.name
@@ -68,7 +71,7 @@ module PgSearchScope
           tsvector = "to_tsvector('#{options[:language]}', #{document})"
           tsquery = "to_tsquery('#{options[:language]}', '#{terms.join(" #{OPERATORS[options[:operator]]} ")}')"
 
-          rank = "ts_rank(#{tsvector}, #{tsquery}, #{options[:normalization]})"
+          rank = "#{scope_options[:rank_function]}(#{tsvector}, #{tsquery}, #{options[:normalization]})"
 
           search_scope = scoped
 

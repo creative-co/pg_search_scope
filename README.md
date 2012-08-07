@@ -36,6 +36,8 @@ You can set additional search options:
 
     :language - Search language, e.g. 'simple' (without magic), 'english'
 
+    :rank_function - Ranking function. Valid values  are  'ts_rank' and 'ts_rank_cd'
+
 If you use `:language` option, you need to use the same option for `add_fulltext_index`
 
 Examples:

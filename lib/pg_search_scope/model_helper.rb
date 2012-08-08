@@ -33,7 +33,7 @@ module PgSearchScope
     #
     # * <tt>:language</tt> - Search language, e.g. 'simple' (without magic), 'english'
     # * <tt>:rank_function</tt> - Ranking function. Valid values  are  'ts_rank' and 'ts_rank_cd'
-    # * <tt>:rank_columns</tt> - If you want to sort table by rank only by specific fields - input column names  hear
+    # * <tt>:rank_columns</tt> - If you want to sort table by rank only by specific fields - input column names  here
     #
     # == Usage
     #

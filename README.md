@@ -38,7 +38,7 @@ You can set additional search options:
 
     :rank_function - Ranking function. Valid values  are  'ts_rank' and 'ts_rank_cd'
 
-    :rank_columns - If you want to sort table by rank only by specific fields - input column names  hear
+    :rank_columns - If you want to sort table by rank only by specific fields - input column names here
 
 If you use `:language` option, you need to use the same option for `add_fulltext_index`
 

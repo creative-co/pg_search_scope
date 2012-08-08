@@ -33,6 +33,7 @@ module PgSearchScope
     #
     # * <tt>:language</tt> - Search language, e.g. 'simple' (without magic), 'english'
     # * <tt>:rank_function</tt> - Ranking function. Valid values  are  'ts_rank' and 'ts_rank_cd'
+    # * <tt>:rank_columns</tt> - If you want to sort table by rank only by specific fields - input column names  hear
     #
     # == Usage
     #
@@ -70,8 +71,13 @@ module PgSearchScope
 
           tsvector = "to_tsvector('#{options[:language]}', #{document})"
           tsquery = "to_tsquery('#{options[:language]}', '#{terms.join(" #{OPERATORS[options[:operator]]} ")}')"
+          rank_tsvector = tsvector
+          if options[:rank_columns].present?
+            rank_document = options[:rank_columns].map { |n| n = "#{prefix}.#{n}" unless n['.']; "coalesce(#{n}, '')" }.join(" || ' ' || ")
+            rank_tsvector = "to_tsvector('#{options[:language]}', #{rank_document})"
+          end
 
-          rank = "#{scope_options[:rank_function]}(#{tsvector}, #{tsquery}, #{options[:normalization]})"
+          rank = "#{scope_options[:rank_function]}(#{rank_tsvector}, #{tsquery}, #{options[:normalization]})"
 
           search_scope = scoped
 

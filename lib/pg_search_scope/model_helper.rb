@@ -56,7 +56,8 @@ module PgSearchScope
         options = scope_options.merge(options || {})
         search_string ||= ''
 
-        terms = search_string.scan(/'*([\p{Lu}\p{Ll}\d\.'@]+)/u).map { |s, _| s.gsub /'/, "''" }
+        terms = search_string.scan(/([\p{Lu}\p{Ll}\d][\p{Lu}\p{Ll}\d\.'@]*)/u).map {|s,_| s.gsub /'/, "''"}
+
 
         if terms.present?
           prefix = arel_table.table_alias || arel_table.name

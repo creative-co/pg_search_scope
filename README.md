@@ -1,4 +1,4 @@
-### PG Search Scope
+### PG Search Scope ;
 
 PostgreSQL full text search using Rails 3 scopes
 

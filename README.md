@@ -1,6 +1,6 @@
 ### PG Search Scope ;
 
-PostgreSQL full text search using Rails 3 scopes
+PostgreSQL full text search using Rails 3 and 4 scopes
 
 ## Basic usage
 

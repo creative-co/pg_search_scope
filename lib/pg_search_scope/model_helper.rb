@@ -1,5 +1,7 @@
 module PgSearchScope
   module ModelHelper
+    SCOPE_METHOD = defined?(ActiveRecord) && ActiveRecord::VERSION::MAJOR > 3 ? :all : :scoped
+    
     DEFAULT_OPTIONS = {
             :as => nil,
             :wildcard => true,
@@ -80,7 +82,7 @@ module PgSearchScope
 
           rank = "#{scope_options[:rank_function]}(#{rank_tsvector}, #{tsquery}, #{options[:normalization]})"
 
-          search_scope = scoped
+          search_scope = send(SCOPE_METHOD)
 
           if options[:select_rank]
             search_scope = search_scope.select("#{rank} #{scope_name}_rank")

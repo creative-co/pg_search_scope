@@ -80,7 +80,7 @@ module PgSearchScope
 
           rank = "#{scope_options[:rank_function]}(#{rank_tsvector}, #{tsquery}, #{options[:normalization]})"
 
-          search_scope = scoped
+          search_scope = send(scope_method)
 
           if options[:select_rank]
             search_scope = search_scope.select("#{rank} #{scope_name}_rank")
@@ -93,6 +93,14 @@ module PgSearchScope
           end
         end
       }
+    end
+
+    def scope_method
+      if defined?(ActiveRecord) && ActiveRecord::VERSION::MAJOR > 3
+        :all
+      else
+        :scoped
+      end
     end
   end
 end

@@ -60,6 +60,7 @@ module PgSearchScope
 
         terms = search_string.scan(/([\p{Lu}\p{Ll}\d][\p{Lu}\p{Ll}\d\.'@]*)/u).map {|s,_| s.gsub /'/, "''"}
 
+        search_scope = send(SCOPE_METHOD)
 
         if terms.present?
           prefix = arel_table.table_alias || arel_table.name
@@ -82,8 +83,6 @@ module PgSearchScope
 
           rank = "#{scope_options[:rank_function]}(#{rank_tsvector}, #{tsquery}, #{options[:normalization]})"
 
-          search_scope = send(SCOPE_METHOD)
-
           if options[:select_rank]
             search_scope = search_scope.select("#{rank} #{scope_name}_rank")
           end
@@ -91,7 +90,7 @@ module PgSearchScope
           search_scope.where("#{tsvector} @@ #{tsquery}").order("#{rank} DESC")
         else
           if options[:select_rank]
-            scoped.select("0 #{scope_name}_rank")
+            search_scope.select("0 #{scope_name}_rank")
           end
         end
       }
